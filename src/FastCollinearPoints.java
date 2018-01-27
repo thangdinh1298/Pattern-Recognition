@@ -1,7 +1,6 @@
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdDraw;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -10,7 +9,6 @@ public class FastCollinearPoints {
     int count;
     int numSegment;
     LineSegment[] lineSegment;
-    ArrayList<lineAndSlope> linesAndSlopes;
     Point[] aux;
     Comparator<Point> comparator;
 
@@ -18,7 +16,7 @@ public class FastCollinearPoints {
         count = 0;
         Point[] aux = new Point[points.length-1];
         numSegment= 0;
-        linesAndSlopes = new ArrayList<>();
+        lineSegment = new LineSegment[1];
         for(int i = 0; i < points.length;i++){ //go through every points
             base = points[i];
             comparator = base.slopeOrder();
@@ -26,17 +24,24 @@ public class FastCollinearPoints {
                 if (points[j] != base) aux[count++] = points[j];
             }
             count = 0;
+            Arrays.sort(aux);
             Arrays.sort(aux,comparator);
             for(int j = 0; j + 2 < aux.length;){
                 if(base.slopeTo(aux[j]) != base.slopeTo(aux[j+2])) j++;
                 else{
-                    System.out.println("bingo");
-                    double slope = base.slopeTo(aux[j]);
                     int k = j + 2;
                     while(k+1 < aux.length && base.slopeTo(aux[k]) == base.slopeTo(aux[k+1])){
                         k ++;
                     }
-                    linesAndSlopes.add(new lineAndSlope(new LineSegment(aux[j],aux[k]),slope));
+                    Point min = aux[j];
+                    Point max = aux[k];
+                    if(base.compareTo(min)<0){
+                        min = base;
+                    }
+                    if(base.compareTo(max)>0){
+                        max = base;
+                    }
+                    addSegment(new LineSegment(min,max));
                     if(k+1 < aux.length) j = k+1;
                     else if(k+1 >= aux.length){
                         break;
@@ -44,25 +49,46 @@ public class FastCollinearPoints {
                 }
             }
         }
-    }     // finds all line segments containing 4 or more points
-
-    private void removeDuplicate(ArrayList<lineAndSlope> linesAndSlopes){
-        for(int i = 0; i < linesAndSlopes.size();){
-            if(linesAndSlopes.get(i).equals(linesAndSlopes.get(i+1))){
-
+//        System.out.println("before nullifying");
+//        for(int i = 0; i <lineSegment.length;i++){
+//            System.out.print(lineSegment[i]+" ");
+//        }
+        for(int i = 0; i < lineSegment.length;i++){
+            if(i+1<lineSegment.length){
+                if(lineSegment[i].equals(lineSegment[i+1])) lineSegment[i] = null;
             }
         }
-    }
-
-    private class lineAndSlope{
-        LineSegment lineSegment;
-        double slope;
-        public lineAndSlope(LineSegment line, double slope){
-            this.lineSegment = line;
-            this.slope = slope;
+        System.out.println(lineSegment[0]+": "+lineSegment[1]);
+//        System.out.println("after nullifying");
+//        for(int i = 0; i <lineSegment.length;i++){
+//            System.out.print(lineSegment[i]+" ");
+//        }
+        LineSegment temp[] = new LineSegment[lineSegment.length];
+        numSegment = 0;
+        for(int i = 0; i <lineSegment.length;i++){
+            if(lineSegment[i] !=null){
+                temp[numSegment++] = lineSegment[i];
+            }
         }
+        lineSegment = temp;
+//        System.out.println("temp");
+//        for(int i = 0; i <temp.length;i++){
+//            System.out.print(temp[i]+" ");
+//        }
+    }     // finds all line segments containing 4 or more points
 
+    private void addSegment(LineSegment segment){
+        if(numSegment+1>lineSegment.length){
+            LineSegment[] temp = new LineSegment[2*lineSegment.length];
+            for(int i = 0; i < lineSegment.length; i++){
+                temp[i] = lineSegment[i];
+            }
+            lineSegment = temp;
+        }
+        lineSegment[numSegment++] = segment;
     }
+
+
     public           int numberOfSegments()  {
         return numSegment;
     }      // the number of line segments
@@ -91,6 +117,6 @@ public class FastCollinearPoints {
             fast.lineSegment[i].draw();
         }
         StdDraw.show();
-//        System.out.println(fast.numberOfSegments());
+        System.out.println(fast.numberOfSegments());
     }
 }
