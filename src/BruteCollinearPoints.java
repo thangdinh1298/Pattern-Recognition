@@ -11,6 +11,8 @@ public class BruteCollinearPoints {
     private int[] indexArray;
     private Point[] points;
     private Comparator<Point> comparator;
+
+
     public BruteCollinearPoints(Point[] points){
         lineSegment = new LineSegment[10];
         this.points = points;
@@ -102,6 +104,6 @@ public class BruteCollinearPoints {
             algo.lineSegment[i].draw();
     }
         StdDraw.show();
-        System.out.println(algo.count);
+        System.out.println(algo.numberOfSegments());
 }
 }
