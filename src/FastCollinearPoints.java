@@ -7,15 +7,19 @@ import java.util.Comparator;
 public class FastCollinearPoints {
     Point base;
     int count;
+    int countSegment;
     int numSegment;
     LineSegment[] lineSegment;
     Point[] aux;
     Comparator<Point> comparator;
+    maximalSegment[] maxSegs ;
 
     public FastCollinearPoints(Point[] points){
         count = 0;
         Point[] aux = new Point[points.length-1];
         numSegment= 0;
+        countSegment = 0;
+        maxSegs = new maximalSegment[1];
         lineSegment = new LineSegment[1];
         for(int i = 0; i < points.length;i++){ //go through every points
             base = points[i];
@@ -41,7 +45,8 @@ public class FastCollinearPoints {
                     if(base.compareTo(max)>0){
                         max = base;
                     }
-                    addSegment(new LineSegment(min,max));
+                    add(new maximalSegment(min,max));
+//                    add(new LineSegment(min,max));
                     if(k+1 < aux.length) j = k+1;
                     else if(k+1 >= aux.length){
                         break;
@@ -49,43 +54,56 @@ public class FastCollinearPoints {
                 }
             }
         }
-//        System.out.println("before nullifying");
-//        for(int i = 0; i <lineSegment.length;i++){
-//            System.out.print(lineSegment[i]+" ");
-//        }
-        for(int i = 0; i < lineSegment.length;i++){
-            if(i+1<lineSegment.length){
-                if(lineSegment[i].equals(lineSegment[i+1])) lineSegment[i] = null;
+        for(int i = 0; i < maxSegs.length;i++){
+            for(int j = i+1; j < maxSegs.length;j++){
+                if(maxSegs[i] !=null && maxSegs[j] !=null){
+                    if( maxSegs[i].equals(maxSegs[j])) maxSegs[j] = null;
+                }
             }
         }
-        System.out.println(lineSegment[0]+": "+lineSegment[1]);
-//        System.out.println("after nullifying");
-//        for(int i = 0; i <lineSegment.length;i++){
-//            System.out.print(lineSegment[i]+" ");
-//        }
-        LineSegment temp[] = new LineSegment[lineSegment.length];
-        numSegment = 0;
-        for(int i = 0; i <lineSegment.length;i++){
-            if(lineSegment[i] !=null){
-                temp[numSegment++] = lineSegment[i];
+        for(int i = 0 ; i < maxSegs.length;i++){
+            if(maxSegs[i] != null){
+                add(maxSegs[i].returnLine());
             }
         }
-        lineSegment = temp;
-//        System.out.println("temp");
-//        for(int i = 0; i <temp.length;i++){
-//            System.out.print(temp[i]+" ");
-//        }
     }     // finds all line segments containing 4 or more points
 
-    private void addSegment(LineSegment segment){
-        if(numSegment+1>lineSegment.length){
-            LineSegment[] temp = new LineSegment[2*lineSegment.length];
-            for(int i = 0; i < lineSegment.length; i++){
-                temp[i] = lineSegment[i];
-            }
-            lineSegment = temp;
+    private class maximalSegment{
+        private Point min;
+        private Point max;
+        public maximalSegment(Point min, Point max){
+            this.min = min;
+            this.max = max;
         }
-        lineSegment[numSegment++] = segment;
+        public boolean equals(maximalSegment that){
+            if (this.min == that.min && this.max == that.max)return true;
+            return false;
+        }
+        public LineSegment returnLine(){
+            return new LineSegment(this.min,this.max);
+        }
+    }
+    private <T> void add(T variable){
+        if(variable.getClass() == LineSegment.class){
+            if(numSegment+1>lineSegment.length){
+                LineSegment[] temp = new LineSegment[2*lineSegment.length];
+                for(int i = 0; i < lineSegment.length; i++){
+                    temp[i] = lineSegment[i];
+                }
+                lineSegment = temp;
+            }
+            lineSegment[numSegment++] = (LineSegment) variable;
+        }
+        else if(variable.getClass() == maximalSegment.class){
+            if(countSegment+1>maxSegs.length){
+                maximalSegment[] temp = new maximalSegment[maxSegs.length*2];
+                for(int i = 0; i < maxSegs.length;i++){
+                    temp[i] = maxSegs[i];
+                }
+                maxSegs = temp;
+            }
+            maxSegs[countSegment++] = (maximalSegment) variable;
+        }
     }
 
 
