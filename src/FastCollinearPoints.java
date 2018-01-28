@@ -5,22 +5,31 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 public class FastCollinearPoints {
-    Point base;
-    int count;
-    int countSegment;
-    int numSegment;
-    LineSegment[] lineSegment;
-    Point[] aux;
-    Comparator<Point> comparator;
-    maximalSegment[] maxSegs ;
+    private Point base;
+    private int count;
+    private int countSegment;
+    private int numSegment;
+    private LineSegment[] lineSegment;
+    private Point[] aux;
+    private Comparator<Point> comparator;
+    private maximalSegment[] maxSegs ;
 
     public FastCollinearPoints(Point[] points){
+
+        if(points == null) throw new IllegalArgumentException();
+        for(int i = 0; i < points.length; i++){
+            if(points[i] == null) throw new IllegalArgumentException();
+            for(int j = i+1; j < points.length;j++){
+                if(points[i] == points[j]) throw new IllegalArgumentException();
+            }
+        }
         count = 0;
         Point[] aux = new Point[points.length-1];
         numSegment= 0;
         countSegment = 0;
         maxSegs = new maximalSegment[1];
         lineSegment = new LineSegment[1];
+        Arrays.sort(points);
         for(int i = 0; i < points.length;i++){ //go through every points
             base = points[i];
             comparator = base.slopeOrder();
@@ -28,7 +37,6 @@ public class FastCollinearPoints {
                 if (points[j] != base) aux[count++] = points[j];
             }
             count = 0;
-            Arrays.sort(aux);
             Arrays.sort(aux,comparator);
             for(int j = 0; j + 2 < aux.length;){
                 if(base.slopeTo(aux[j]) != base.slopeTo(aux[j+2])) j++;
@@ -66,8 +74,16 @@ public class FastCollinearPoints {
                 add(maxSegs[i].returnLine());
             }
         }
+        resize();
     }     // finds all line segments containing 4 or more points
 
+    private void resize(){
+        LineSegment[] temp = new LineSegment[numSegment];
+        for(int i = 0; i < numSegment; i ++){
+            temp[i] = lineSegment[i];
+        }
+        lineSegment = temp;
+    }
     private class maximalSegment{
         private Point min;
         private Point max;

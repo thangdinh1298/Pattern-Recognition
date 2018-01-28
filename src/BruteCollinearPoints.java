@@ -14,22 +14,40 @@ public class BruteCollinearPoints {
 
 
     public BruteCollinearPoints(Point[] points){
-        lineSegment = new LineSegment[10];
-        this.points = points;
-        indexArray = new int[4];
-        for(int i = 0; i <4; i++){
-            indexArray[i] = i;
-        }
-        if(isCollinear()){
-            minAndMax();
-        }
-        while(!isFinal()){
-            nextPermutation();
-            if(isCollinear()){
-                minAndMax();
+
+        if(points == null) throw new IllegalArgumentException();
+        for(int i = 0; i < points.length; i++){
+            if(points[i] == null) throw new IllegalArgumentException();
+            for(int j = i+1; j < points.length;j++){
+                if(points[i] == points[j]) throw new IllegalArgumentException();
             }
         }
+        if(points.length >= 4) {
+            lineSegment = new LineSegment[10];
+            this.points = points;
+            indexArray = new int[4];
+            for (int i = 0; i < 4; i++) {
+                indexArray[i] = i;
+            }
+            if (isCollinear()) {
+                minAndMax();
+            }
+            while (!isFinal()) {
+                nextPermutation();
+                if (isCollinear()) {
+                    minAndMax();
+                }
+            }
+            resize();
+        }
     }    // finds all line segments containing 4 points
+    private void resize(){
+        LineSegment[] temp = new LineSegment[numSegment];
+        for(int i = 0; i < numSegment; i ++){
+            temp[i] = lineSegment[i];
+        }
+        lineSegment = temp;
+    }
     private void minAndMax(){
         Point min = this.points[indexArray[0]];
         Point max = this.points[indexArray[0]];
